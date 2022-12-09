@@ -11,32 +11,26 @@ using DevExpress.XtraPrinting;
 using DevExpress.XtraPrinting.Native;
 using DevExpress.XtraReports.UI;
 using System.Diagnostics;
+using DevExpress.Drawing;
 
-namespace WindowsFormsApplication1
-{
-    public partial class Form1 : Form
-    {
-        public Form1()
-        {
+namespace WindowsFormsApplication1 {
+    public partial class Form1 : Form {
+        public Form1() {
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
+        private void button1_Click(object sender, EventArgs e) {
             XtraReport1 report = new XtraReport1();
             report.CreateDocument();
 
-            using (StreamWriter writer = File.CreateText("FINALOUTPUT.txt"))
-            {
-                foreach (Page page in report.Pages)
-                {
-                    PrintingSystem ps = new PrintingSystem();
+            using (StreamWriter writer = File.CreateText("FINALOUTPUT.txt")) {
+                foreach (Page page in report.Pages) {
+                    PrintingSystemBase ps = new PrintingSystemBase();
                     ps.Begin();
-                    ps.Graph.PageUnit = GraphicsUnit.Document;
+                    ps.Graph.PageUnit = DXGraphicsUnit.Document;
                     ps.Graph.Modifier = BrickModifier.Detail;
                     foreach (BrickBase brick in ((CompositeBrick)page.InnerBricks[0]).InnerBricks)
-                        if (brick is Brick)
-                        {
+                        if (brick is Brick) {
                             Brick newBrick = brick.Clone() as Brick;
                             newBrick.PrintingSystem = ps;
                             ps.Graph.DrawBrick((Brick)brick);
@@ -45,12 +39,11 @@ namespace WindowsFormsApplication1
                     ps.End();
 
                     MemoryStream ms = new MemoryStream();
-                    ps.ExportToText(ms, new TextExportOptions() { TextExportMode = TextExportMode.Text, Separator = " " });
+                    ps.ExportToText(ms, new TextExportOptions() { TextExportMode = TextExportMode.Text, Separator = " ", Encoding = Encoding.UTF8 });
 
                     ms.Position = 0;
 
-                    using (StreamReader reader = new StreamReader(ms))
-                    {
+                    using (StreamReader reader = new StreamReader(ms)) {
                         writer.Write(reader.ReadToEnd());
                     }
 
